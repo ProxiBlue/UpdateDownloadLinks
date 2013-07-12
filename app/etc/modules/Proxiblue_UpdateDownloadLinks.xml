@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <ProxiBlue_UpdateDownloadLinks>
+            <active>true</active>
+            <codePool>local</codePool>
+        </ProxiBlue_UpdateDownloadLinks>
+    </modules>
+</config>
