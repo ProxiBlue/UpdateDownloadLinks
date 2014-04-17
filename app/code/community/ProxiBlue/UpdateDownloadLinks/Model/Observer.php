@@ -9,18 +9,21 @@ class ProxiBlue_UpdateDownloadLinks_Model_Observer {
             $productPurItem = Mage::getModel('downloadable/link_purchased_item')->getCollection()
                     ->addFieldToFilter('product_id', $product->getId());
             if ($product->getTypeInstance(true)->hasLinks($product)) {
-                $fl = $product->getTypeInstance(true)->getLinks($product);
-                foreach ($fl as $fl1) {
+                $files = $product->getTypeInstance(true)->getLinks($product);
+                foreach ($files as $file) {
                     if (!is_null($productPurItem)) {
                         foreach ($productPurItem as $_itemPur) {
-                            $_itemPur->setLinkUrl(null)
-                                    ->setLinkId($fl1["link_id"])
-                                    ->setLinkType('file')
-                                    ->setLinkTitle($fl1["default_title"])
-                                    ->setStatus($_itemPur->getStatus())
-                                    ->setLinkFile($fl1["link_file"])
-                                    ->setUpdatedAt($date->format('Y-m-d H:i:s'))
-                                    ->save();
+                            if($_itemPur->getLinkId() == $file->getLinkId()){
+                                // update existing
+                                $_itemPur->setLinkUrl(null)
+                                        ->setLinkId($file["link_id"])
+                                        ->setLinkType('file')
+                                        ->setLinkTitle($file["default_title"])
+                                        ->setStatus($_itemPur->getStatus())
+                                        ->setLinkFile($file["link_file"])
+                                        ->setUpdatedAt($date->format('Y-m-d H:i:s'))
+                                        ->save();
+                            }
                         }
                     }
                 }
