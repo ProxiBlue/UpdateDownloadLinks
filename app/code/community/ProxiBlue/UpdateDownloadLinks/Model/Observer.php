@@ -5,31 +5,50 @@ class ProxiBlue_UpdateDownloadLinks_Model_Observer {
     public function catalog_product_save_after($observer) {
         $product = $observer->getEvent()->getProduct();
         if ($product->getTypeId() == Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
-            $date = new DateTime();
-            $productPurItem = Mage::getModel('downloadable/link_purchased_item')->getCollection()
-                    ->addFieldToFilter('product_id', $product->getId());
-            if ($product->getTypeInstance(true)->hasLinks($product)) {
-                $files = $product->getTypeInstance(true)->getLinks($product);
-                foreach ($files as $file) {
-                    if (!is_null($productPurItem)) {
-                        foreach ($productPurItem as $_itemPur) {
-                            if($_itemPur->getLinkId() == $file->getLinkId()){
-                                // update existing
-                                $_itemPur->setLinkUrl(null)
-                                        ->setLinkId($file["link_id"])
-                                        ->setLinkType('file')
-                                        ->setLinkTitle($file["default_title"])
-                                        ->setStatus($_itemPur->getStatus())
-                                        ->setLinkFile($file["link_file"])
-                                        ->setUpdatedAt($date->format('Y-m-d H:i:s'))
-                                        ->save();
-                            }
-                        }
+            // get all the purchased items that match the product
+            $linkPurchasedItems = Mage::getModel('downloadable/link_purchased_item')->getCollection()
+                            ->addFieldToFilter('product_id', $product->getId())->load();
+            $currentPurchasedItems = $linkPurchasedItems->getItems();
+            $files = $product->getTypeInstance(true)->getLinks($product);
+            //build a list of purchase objects (orders) that were used to buy this product
+            $productId = $product->getId();
+            $collection = Mage::getResourceModel('sales/order_item_collection')
+                ->addAttributeToFilter('product_id', array('eq' => $productId))
+                ->load();
+            $purchaseObjects = array();
+            foreach($collection as $orderItem) {
+                $purchaseObject = mage::getModel('downloadable/link_purchased')->load($orderItem->getOrderId(),'order_id');
+                if($purchaseObject->getId()) {
+                    $purchaseObjects[$purchaseObject->getId()] = $purchaseObject;
+                }    
+            }
+            //determine and add any new files to the orders that have the product
+            $newFiles = array_diff_key($files, $currentPurchasedItems);
+            foreach ($newFiles as $newFile) {
+                //attach each new file to the purchase
+                foreach ($purchaseObjects as $linkPurchased) {
+                    if ($linkPurchased->getOrderItemId()) {
+                        $linkHash = strtr(base64_encode(microtime() . $linkPurchased->getId() . $linkPurchased->getOrderItemId()
+                                        . $product->getId()), '+/=', '-_,');
+                        $linkPurchasedItem = Mage::getModel('downloadable/link_purchased_item');
+                        $linkPurchasedItem->setData($newFile->getData());
+                        $linkPurchasedItem->unsItemId();                        
+                        $linkPurchasedItem->setPurchasedId($linkPurchased->getId())
+                                ->setOrderItemId($linkPurchased->getOrderItemId())
+                                ->setLinkHash($linkHash)
+                                ->setLinkTitle($newFile->getTitle())
+                                ->setStatus(Mage_Downloadable_Model_Link_Purchased_Item::LINK_STATUS_AVAILABLE);
+                                //->setUpdatedAt(now())
+                        $linkPurchasedItem->save();
                     }
                 }
+            }
+            // determine what is no longer attached as files and remove from the download links
+            $noLongerAttachedAsFiles = array_diff_key($currentPurchasedItems,$files);
+            foreach ($noLongerAttachedAsFiles as $purchasedLink) {
+                $purchasedLink->delete();
             }
         }
     }
 
 }
-
