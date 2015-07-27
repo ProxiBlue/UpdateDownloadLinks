@@ -24,16 +24,6 @@
                     </updatedownloadlinks>
                 </observers>
             </catalog_product_save_after>
-        </events>
-        <resources>
-            <proxiblue_updatedownloadlinks_setup>
-                <setup>
-                    <module>ProxiBlue_UpdateDownloadLinks</module>
-                </setup>
-                <connection>
-                    <use>core_setup</use>
-                </connection>
-            </proxiblue_updatedownloadlinks_setup>
-        </resources>        
+        </events>      
     </global>
 </config>
