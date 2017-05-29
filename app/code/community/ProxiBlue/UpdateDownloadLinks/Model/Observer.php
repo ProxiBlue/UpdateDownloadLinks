@@ -12,15 +12,21 @@ class ProxiBlue_UpdateDownloadLinks_Model_Observer {
             $files = $product->getTypeInstance(true)->getLinks($product);
             //build a list of purchase objects (orders) that were used to buy this product
             $productId = $product->getId();
+            $productSku = $product->getSku();
             $collection = Mage::getResourceModel('sales/order_item_collection')
                 ->addAttributeToFilter('product_id', array('eq' => $productId))
                 ->load();
             $purchaseObjects = array();
-            foreach($collection as $orderItem) {
-                $purchaseObject = mage::getModel('downloadable/link_purchased')->load($orderItem->getOrderId(),'order_id');
+            foreach($collection as $orderItem) {                
+                //check for exact product since several purchased products could be placed per order                
+                $purchaseObject = mage::getModel('downloadable/link_purchased')->getCollection()
+                        ->addFieldToFilter('order_id', $orderItem->getOrderId())
+                        ->addFieldToFilter('product_sku', $productSku)
+                        ->getFirstItem();                
+                
                 if($purchaseObject->getId()) {
                     $purchaseObjects[$purchaseObject->getId()] = $purchaseObject;
-                }    
+                }                
             }
             //determine and add any new files to the orders that have the product
             $newFiles = array_diff_key($files, $currentPurchasedItems);
