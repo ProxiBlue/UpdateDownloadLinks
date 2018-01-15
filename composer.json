@@ -1,0 +1,17 @@
+{
+  "name": "proxiblue/updatedownloadlinks",
+  "type": "magento-module",
+  "license": "Unknown",
+  "homepage": "https://github.com/ProxiBlue/UpdateDownloadLinks",
+  "description": "This FREE module will update all the download links for purchased downloadable products to the latest uploaded file.",
+  "authors": [
+    {
+      "name": "Lucas van Staden",
+      "email": "sales@proxiblue.com.au"
+    }
+  ],
+  "require": {
+    "php": ">=5.5",
+    "magento-hackathon/magento-composer-installer": "*"
+  }
+}

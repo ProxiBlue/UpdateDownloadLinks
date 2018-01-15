@@ -10,3 +10,17 @@ Created that super update to your downloadable product? Customers contacting you
 
 http://www.proxiblue.com.au/magento-modules/update-download-links.html
 
+Composer Installation:
+
+Add to project composer.json:
+```json
+"repositories":[
+    ...
+    { "type": "git", "url": "https://github.com/ProxiBlue/UpdateDownloadLinks.git"}
+]
+```
+
+Then type:
+```sh
+composer require proxiblue/updatedownloadlinks dev-master
+```
