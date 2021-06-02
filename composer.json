@@ -1,7 +1,7 @@
 {
   "name": "proxiblue/updatedownloadlinks",
   "type": "magento-module",
-  "license": "Unknown",
+  "license": "MIT",
   "homepage": "https://github.com/ProxiBlue/UpdateDownloadLinks",
   "description": "This FREE module will update all the download links for purchased downloadable products to the latest uploaded file.",
   "authors": [
